@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ACMDA — AI Customer Messaging & Dev Assistant
 
 **Repo:** [https://github.com/Croasdell/ACMDA](https://github.com/Croasdell/ACMDA)
@@ -216,3 +217,25 @@ php dolphin_cli.php
 
 No actual `data/` or `app/` directories yet. Current repo is a barebones POC.
 
+=======
+# ACMDA – AI Customer Messaging & Developer Assistant
+
+This project is a local AI system for customer messaging and developer assistance, designed for Handyman Plus Van. It includes:
+- Secure, offline AI assistant (Dolphin)
+- WhatsApp integration with human approval
+- Business knowledge base
+- Developer helper mode
+
+## Setup
+1. Clone this repo to your local machine or server.
+2. Add business documents to `services.txt`.
+3. Run indexing scripts to train the AI.
+
+## Usage
+- For customer messaging, use the WhatsApp pipeline.
+- For developer help, use the RAG system and local docs.
+
+---
+
+See `services.txt` for business services and policies.
+>>>>>>> 0dda99d (Initial ACMDA project setup with services.txt, README, and .gitignore)

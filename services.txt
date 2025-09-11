@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Handyman Plus Van Services
 =========================
 
@@ -18,3 +19,50 @@ Not Offered:
 Pricing & Booking:
 Quotes and availability are handled via the booking system on https://www.handymanplusvan.co.uk.
 Please do not book directly through messages.
+=======
+Handyman Plus Van – Services Knowledge Base
+
+---
+
+# Services Offered
+
+- Flat-pack furniture assembly (IKEA, Argos, etc.)
+- Door fitting and repairs (internal/external)
+- Lock fitting and replacement
+- Tiling (wall and floor repairs, small jobs)
+- Plumbing repairs (leaks, tap replacement, toilet repairs)
+- Curtain/blind fitting
+- TV wall mounting
+- Shelving and storage installation
+- Minor electrical (light fittings, switches, sockets)
+- Garden maintenance (fence repairs, shed assembly)
+- General handyman tasks (hanging pictures, mirrors, etc.)
+
+# Services NOT Offered
+
+- Carpet fitting
+- Full bathroom/kitchen installations
+- Major electrical work (rewiring, fuse boxes)
+- Gas work (boilers, cookers)
+- Roofing
+- Large building projects
+- Waste/rubbish removal
+- Vehicle repairs
+
+# Pricing & Availability Policy
+
+- Pricing is based on job type and time required. For a quote, please describe your job.
+- Availability is subject to existing bookings. Please use the online booking system for scheduling.
+- No direct bookings via WhatsApp or AI assistant. All appointments must be made through the official booking system.
+
+# FAQs & Business Rules
+
+- The AI assistant can answer questions about services, pricing policy, and availability, but cannot book jobs directly.
+- For urgent jobs, please use the booking system and mark as urgent.
+- All work is carried out locally (service area: [insert area here]).
+- If unsure whether a job is covered, please ask for clarification.
+
+---
+
+This file is indexed for Dolphin AI. Replies should always reflect the above policies and service list. If a service is not listed, assume it is NOT offered unless confirmed by Ian.
+>>>>>>> 0dda99d (Initial ACMDA project setup with services.txt, README, and .gitignore)
