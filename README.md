@@ -38,6 +38,17 @@ AI – Customer Messaging &amp; Developer Assistan ACMDA
   * Pricing / availability policy (refer to booking system, don’t book directly).
 * This is indexed into the RAG system so Dolphin always replies **on-brand and accurate**.
 
+### Usage
+
+Place `acmda.php`, `services.php`, and `mem.php` in the project root.
+
+* `mem.php` initializes `memory.sqlite`, seeds business facts, and provides helpers:
+  * `php mem.php facts`
+  * `php mem.php remember <user> <message> <response>`
+  * `php mem.php recall <user>`
+* `acmda.php` loads service definitions and creates `acmda.sqlite` for the WhatsApp message pipeline. Use commands like `php acmda.php receive <user> <message>` to interact with the system.
+* `wa_webhook.php` handles Meta's webhook callbacks. Set `WA_VERIFY_TOKEN` and point the callback URL at this script to store inbound messages.
+
 ### 4. **Networking & Security**
 
 * Server IP: `192.168.1.142` (fixed via router DHCP reservation).
