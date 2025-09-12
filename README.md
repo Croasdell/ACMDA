@@ -77,3 +77,11 @@ Place `acmda.php` and `wa_webhook.php` in the project root on the machine runnin
 6. **Optional: Add web research mode**
    * Allow Dolphin (dev mode only) to fetch + index external docs.
    * Keep **customer mode offline** for privacy and reliability.
+
+## Running Tests
+
+Execute the PHPUnit test suite to verify message handling logic:
+
+```
+./vendor/bin/phpunit
+```
