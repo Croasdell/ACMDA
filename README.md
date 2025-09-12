@@ -82,10 +82,3 @@ AI – Customer Messaging &amp; Developer Assistan ACMDA
    * Allow Dolphin (dev mode only) to fetch + index external docs.
    * Keep **customer mode offline** for privacy and reliability.
 
-## Running Tests
-
-Execute the PHPUnit test suite to verify message handling logic:
-
-```
-./vendor/bin/phpunit
-```
