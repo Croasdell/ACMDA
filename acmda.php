@@ -94,36 +94,38 @@ function sendApprovedMessages(PDO $db): void {
     }
 }
 
-$db = initDb($dbFile);
-$cmd = $argv[1] ?? '';
+if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
+    $db = initDb($dbFile);
+    $cmd = $argv[1] ?? '';
 
-switch ($cmd) {
-    case 'receive':
-        $sender = $argv[2] ?? 'customer';
-        $msg = $argv[3] ?? '';
-        $id = receiveMessage($db, $sender, $msg, $services);
-        echo "Message stored with id $id\n";
-        break;
-    case 'approve':
-        $id = (int) ($argv[2] ?? 0);
-        approveMessage($db, $id);
-        echo "Message $id approved\n";
-        break;
-    case 'reject':
-        $id = (int) ($argv[2] ?? 0);
-        rejectMessage($db, $id);
-        echo "Message $id rejected\n";
-        break;
-    case 'send':
-        sendApprovedMessages($db);
-        break;
-    case 'memory':
-        $user = $argv[2] ?? 'customer';
-        $mem = getMemory($db, $user);
-        foreach ($mem as $row) {
-            echo "{$row['message']} => {$row['response']}\n";
-        }
-        break;
-    default:
-        echo "Usage: php acmda.php [receive|approve|reject|send|memory]\n";
+    switch ($cmd) {
+        case 'receive':
+            $sender = $argv[2] ?? 'customer';
+            $msg = $argv[3] ?? '';
+            $id = receiveMessage($db, $sender, $msg, $services);
+            echo "Message stored with id $id\n";
+            break;
+        case 'approve':
+            $id = (int) ($argv[2] ?? 0);
+            approveMessage($db, $id);
+            echo "Message $id approved\n";
+            break;
+        case 'reject':
+            $id = (int) ($argv[2] ?? 0);
+            rejectMessage($db, $id);
+            echo "Message $id rejected\n";
+            break;
+        case 'send':
+            sendApprovedMessages($db);
+            break;
+        case 'memory':
+            $user = $argv[2] ?? 'customer';
+            $mem = getMemory($db, $user);
+            foreach ($mem as $row) {
+                echo "{$row['message']} => {$row['response']}\n";
+            }
+            break;
+        default:
+            echo "Usage: php acmda.php [receive|approve|reject|send|memory]\n";
+    }
 }
