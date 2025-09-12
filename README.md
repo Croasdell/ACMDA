@@ -8,7 +8,7 @@ AI – Customer Messaging &amp; Developer Assistan ACMDA
 * Runs via CLI (`dolphin` command).
 * Connected to:
 
-  * **Memory system**: SQLite `memory.sqlite` for persistent conversation history (`mem.php`).
+   * **Memory system**: SQLite `acmda.sqlite` for persistent conversation history, managed by `acmda.php`.
   * **RAG system**: `dev_docs` folder indexed with `dev_index_folder.sh` for external PDFs, txt, PHP docs, etc.
   * **Optional web fetcher**: `web_fetch.sh` to grab online docs and index them.
 
@@ -40,13 +40,9 @@ AI – Customer Messaging &amp; Developer Assistan ACMDA
 
 ### Usage
 
-Place `acmda.php`, `services.php`, and `mem.php` in the project root.
+Place `acmda.php` and `wa_webhook.php` in the project root on the machine running the AI.
 
-* `mem.php` initializes `memory.sqlite`, seeds business facts, and provides helpers:
-  * `php mem.php facts`
-  * `php mem.php remember <user> <message> <response>`
-  * `php mem.php recall <user>`
-* `acmda.php` loads service definitions and creates `acmda.sqlite` for the WhatsApp message pipeline. Use commands like `php acmda.php receive <user> <message>` to interact with the system.
+* `acmda.php` embeds service definitions, manages long-term memory, and creates `acmda.sqlite` for the WhatsApp message pipeline. Use commands like `php acmda.php receive <user> <message>` to interact with the system.
 * `wa_webhook.php` handles Meta's webhook callbacks. Set `WA_VERIFY_TOKEN` and point the callback URL at this script to store inbound messages.
 
 ### 4. **Networking & Security**
@@ -62,7 +58,7 @@ Place `acmda.php`, `services.php`, and `mem.php` in the project root.
 
 1. **Finalize memory integration**
 
-   * Fix `mem.php` → now working, Dolphin remembers “Ian” and conversations.
+   * Verify `acmda.php` stores and recalls conversations so Dolphin remembers "Ian" and chats.
    * Extend memory to include **business context** (services, FAQs).
 
 2. **Complete WhatsApp pipeline**

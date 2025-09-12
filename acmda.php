@@ -40,7 +40,12 @@ function getMemory(PDO $db, string $user): array {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$services = require __DIR__ . '/services.php';
+// Embedded business service definitions used to craft rule-based replies.
+$services = [
+    'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
+    'not_offered' => ['carpet fitting', 'electrical rewiring'],
+    'policy' => 'Please use the online booking system for prices and availability.'
+];
 
 function draftReply(PDO $db, string $user, string $message, array $services): string {
     $lower = strtolower($message);
