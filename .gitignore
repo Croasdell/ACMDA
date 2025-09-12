@@ -1,0 +1,3 @@
+/vendor/
+acmda.sqlite
+.phpunit.result.cache
