@@ -42,7 +42,22 @@ function getMemory(PDO $db, string $user): array {
 
 // Embedded business service definitions used to craft rule-based replies.
 $services = [
-    'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
+    'offers' => [
+        'carpentry',
+        'plumbing',
+        'damp proofing',
+        'flat roofing',
+        'painting',
+        'kitchen fitting',
+        'bathroom installation',
+        'tiling',
+        'refurbishment',
+        'hanging mirrors',
+        'hanging tvs',
+        'fencing',
+        'window mechanism repairs',
+        'changing locks'
+    ],
     'not_offered' => ['carpet fitting', 'electrical rewiring'],
     'policy' => 'Please use the online booking system for prices and availability.'
 ];

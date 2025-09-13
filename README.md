@@ -27,11 +27,11 @@ AI – Customer Messaging & Developer Assistant (ACMDA)
 
 ### 3. **Business Knowledge (Services File)**
 
-* AI needs structured text (local `services.txt` or DB table) with:
-  * What services Ian offers (assembly, doors, locks, tiling, plumbing repairs, etc.).
-  * What services Ian **does not** offer.
-  * Pricing / availability policy (refer to booking system, don’t book directly).
-* This is indexed into the RAG system so Dolphin always replies **on-brand and accurate**.
+* AI needs structured text (local `services.txt` in the project root) with:
+  * What services Ian offers (carpentry, plumbing, damp proofing, flat roofing, painting, kitchen fittings, bathroom installations, tiling, refurbishments, hanging mirrors & TVs, fencing, window mechanism repairs, changing locks).
+  * What services Ian **does not** offer (carpet fitting, electrical rewiring).
+  * Pricing / availability policy (please use the online booking system for prices and availability).
+* `services.txt` is indexed into the RAG system so Dolphin always replies **on-brand and accurate**.
 
 ### Usage
 
