@@ -2,6 +2,8 @@
 // All-in-one AI Customer Messaging & Developer Assistant (ACMDA)
 // This single script provides memory, RAG, and a WhatsApp message pipeline.
 
+require_once __DIR__ . '/mem.php';
+
 $dbFile = __DIR__ . '/acmda.sqlite';
 
 function initDb(string $dbFile): PDO {
@@ -26,6 +28,7 @@ function initDb(string $dbFile): PDO {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
     SQL);
+    initBusiness($db);
     return $db;
 }
 
@@ -40,13 +43,17 @@ function getMemory(PDO $db, string $user): array {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$services = [
-    'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
-    'not_offered' => ['carpet fitting', 'electrical rewiring'],
-    'policy' => 'Please use the online booking system for prices and availability.'
-];
 
-function draftReply(PDO $db, string $user, string $message, array $services): string {
+function defaultServices(): array {
+    return [
+        'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
+        'not_offered' => ['carpet fitting', 'electrical rewiring'],
+        'policy' => 'Please use the online booking system for prices and availability.'
+    ];
+}
+
+function draftReply(PDO $db, string $user, string $message): string {
+    $services = loadBusinessData($db);
     $lower = strtolower($message);
     foreach ($services['offers'] as $service) {
         if (str_contains($lower, $service)) {
@@ -67,8 +74,8 @@ function draftReply(PDO $db, string $user, string $message, array $services): st
     return $reply;
 }
 
-function receiveMessage(PDO $db, string $sender, string $message, array $services): int {
-    $draft = draftReply($db, $sender, $message, $services);
+function receiveMessage(PDO $db, string $sender, string $message): int {
+    $draft = draftReply($db, $sender, $message);
     $stmt = $db->prepare('INSERT INTO wa_messages(sender, message, draft, status) VALUES (?, ?, ?, "pending")');
     $stmt->execute([$sender, $message, $draft]);
     return (int) $db->lastInsertId();
@@ -96,13 +103,19 @@ function sendApprovedMessages(PDO $db): void {
 
 if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
     $db = initDb($dbFile);
+    $services = loadBusinessData($db);
+    if (!$services) {
+        $services = defaultServices();
+        saveBusinessData($db, $services);
+    }
+
     $cmd = $argv[1] ?? '';
 
     switch ($cmd) {
         case 'receive':
             $sender = $argv[2] ?? 'customer';
             $msg = $argv[3] ?? '';
-            $id = receiveMessage($db, $sender, $msg, $services);
+            $id = receiveMessage($db, $sender, $msg);
             echo "Message stored with id $id\n";
             break;
         case 'approve':
