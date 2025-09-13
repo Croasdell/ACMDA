@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../acmda.php';
+require_once __DIR__ . '/../wa_webhook.php';
 
 class ACMDATest extends TestCase
 {
@@ -67,5 +68,33 @@ class ACMDATest extends TestCase
 
         $status = $db->query('SELECT status FROM wa_messages WHERE id = ' . $id)->fetchColumn();
         $this->assertSame('sent', $status);
+    }
+
+    public function testWebhookVerification(): void
+    {
+        $db = $this->getDb();
+        [$code, $body] = waHandleWebhook($db, 'GET', ['hub_verify_token' => 'tok', 'hub_challenge' => 'abc'], '', 'tok');
+        $this->assertSame(200, $code);
+        $this->assertSame('abc', $body);
+    }
+
+    public function testWebhookStoresIncomingMessage(): void
+    {
+        $db = $this->getDb();
+        $json = json_encode([
+            'entry' => [[
+                'changes' => [[
+                    'value' => [
+                        'messages' => [[
+                            'from' => '123',
+                            'text' => ['body' => 'hi there']
+                        ]]
+                    ]
+                ]]
+            ]]
+        ]);
+        waHandleWebhook($db, 'POST', [], $json, 'tok');
+        $count = (int) $db->query('SELECT COUNT(*) FROM wa_messages')->fetchColumn();
+        $this->assertSame(1, $count);
     }
 }
