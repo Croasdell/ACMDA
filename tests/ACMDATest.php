@@ -19,13 +19,15 @@ class ACMDATest extends TestCase
 
     private function getDb(): PDO
     {
-        return initDb(':memory:');
+        $db = initDb(':memory:');
+        saveBusinessData($db, $this->services);
+        return $db;
     }
 
     public function testDraftReplySavesMemoryAndReturnsMessage(): void
     {
         $db = $this->getDb();
-        $reply = draftReply($db, 'alice', 'Can you do assembly?', $this->services);
+        $reply = draftReply($db, 'alice', 'Can you do assembly?');
         $this->assertSame('Yes, Ian can help with assembly. Please use the online booking system for prices and availability.', $reply);
 
         $mem = $db->query('SELECT user, message, response FROM memory')->fetchAll(PDO::FETCH_ASSOC);
@@ -37,7 +39,7 @@ class ACMDATest extends TestCase
     public function testReceiveMessageStoresPendingWithDraft(): void
     {
         $db = $this->getDb();
-        $id = receiveMessage($db, 'bob', 'Need help with doors', $this->services);
+        $id = receiveMessage($db, 'bob', 'Need help with doors');
 
         $stmt = $db->prepare('SELECT sender, message, draft, status FROM wa_messages WHERE id = ?');
         $stmt->execute([$id]);
@@ -52,7 +54,7 @@ class ACMDATest extends TestCase
     public function testApprovalAndSendTransitions(): void
     {
         $db = $this->getDb();
-        $id = receiveMessage($db, 'carol', 'locks needed', $this->services);
+        $id = receiveMessage($db, 'carol', 'locks needed');
 
         approveMessage($db, $id);
         $status = $db->query('SELECT status FROM wa_messages WHERE id = ' . $id)->fetchColumn();
