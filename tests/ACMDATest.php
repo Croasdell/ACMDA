@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../acmda.php';
+require_once __DIR__ . '/../wa_webhook.php';
 
 class ACMDATest extends TestCase
 {
@@ -19,13 +20,15 @@ class ACMDATest extends TestCase
 
     private function getDb(): PDO
     {
-        return initDb(':memory:');
+        $db = initDb(':memory:');
+        saveBusinessData($db, $this->services);
+        return $db;
     }
 
     public function testDraftReplySavesMemoryAndReturnsMessage(): void
     {
         $db = $this->getDb();
-        $reply = draftReply($db, 'alice', 'Can you do assembly?', $this->services);
+        $reply = draftReply($db, 'alice', 'Can you do assembly?');
         $this->assertSame('Yes, Ian can help with assembly. Please use the online booking system for prices and availability.', $reply);
 
         $mem = $db->query('SELECT user, message, response FROM memory')->fetchAll(PDO::FETCH_ASSOC);
@@ -37,7 +40,7 @@ class ACMDATest extends TestCase
     public function testReceiveMessageStoresPendingWithDraft(): void
     {
         $db = $this->getDb();
-        $id = receiveMessage($db, 'bob', 'Need help with doors', $this->services);
+        $id = receiveMessage($db, 'bob', 'Need help with doors');
 
         $stmt = $db->prepare('SELECT sender, message, draft, status FROM wa_messages WHERE id = ?');
         $stmt->execute([$id]);
@@ -52,7 +55,7 @@ class ACMDATest extends TestCase
     public function testApprovalAndSendTransitions(): void
     {
         $db = $this->getDb();
-        $id = receiveMessage($db, 'carol', 'locks needed', $this->services);
+        $id = receiveMessage($db, 'carol', 'locks needed');
 
         approveMessage($db, $id);
         $status = $db->query('SELECT status FROM wa_messages WHERE id = ' . $id)->fetchColumn();
@@ -65,5 +68,33 @@ class ACMDATest extends TestCase
 
         $status = $db->query('SELECT status FROM wa_messages WHERE id = ' . $id)->fetchColumn();
         $this->assertSame('sent', $status);
+    }
+
+    public function testWebhookVerification(): void
+    {
+        $db = $this->getDb();
+        [$code, $body] = waHandleWebhook($db, 'GET', ['hub_verify_token' => 'tok', 'hub_challenge' => 'abc'], '', 'tok');
+        $this->assertSame(200, $code);
+        $this->assertSame('abc', $body);
+    }
+
+    public function testWebhookStoresIncomingMessage(): void
+    {
+        $db = $this->getDb();
+        $json = json_encode([
+            'entry' => [[
+                'changes' => [[
+                    'value' => [
+                        'messages' => [[
+                            'from' => '123',
+                            'text' => ['body' => 'hi there']
+                        ]]
+                    ]
+                ]]
+            ]]
+        ]);
+        waHandleWebhook($db, 'POST', [], $json, 'tok');
+        $count = (int) $db->query('SELECT COUNT(*) FROM wa_messages')->fetchColumn();
+        $this->assertSame(1, $count);
     }
 }
