@@ -91,6 +91,18 @@ function rejectMessage(PDO $db, int $id): void {
     $stmt->execute([$id]);
 }
 
+function regenerateMessage(PDO $db, int $id): void {
+    $stmt = $db->prepare('SELECT sender, message FROM wa_messages WHERE id = ?');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row) {
+        return;
+    }
+    $draft = draftReply($db, $row['sender'], $row['message']);
+    $upd = $db->prepare('UPDATE wa_messages SET draft = ?, status = "pending" WHERE id = ?');
+    $upd->execute([$draft, $id]);
+}
+
 function sendApprovedMessages(PDO $db): void {
     $stmt = $db->query('SELECT id, sender, draft FROM wa_messages WHERE status = "approved"');
     $msgs = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -128,6 +140,11 @@ if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIP
             rejectMessage($db, $id);
             echo "Message $id rejected\n";
             break;
+        case 'regenerate':
+            $id = (int) ($argv[2] ?? 0);
+            regenerateMessage($db, $id);
+            echo "Message $id regenerated\n";
+            break;
         case 'send':
             sendApprovedMessages($db);
             break;
@@ -139,6 +156,6 @@ if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIP
             }
             break;
         default:
-            echo "Usage: php acmda.php [receive|approve|reject|send|memory]\n";
+            echo "Usage: php acmda.php [receive|approve|reject|regenerate|send|memory]\n";
     }
 }
