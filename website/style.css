@@ -1,0 +1,248 @@
+:root {
+  --brand-blue: #1c3d5a;
+  --brand-gold: #f4b41a;
+  --text-dark: #222;
+  --text-muted: #555;
+  --bg-light: #f7f9fc;
+  --card-bg: #ffffff;
+  --border-radius: 12px;
+  --shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--brand-blue);
+}
+
+a:hover,
+a:focus {
+  color: #0e2235;
+}
+
+header {
+  background: linear-gradient(135deg, var(--brand-blue), #0f2538);
+  color: #fff;
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,%3Csvg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Crect opacity="0.05" width="160" height="160" fill="white"/%3E%3C/svg%3E');
+  pointer-events: none;
+}
+
+header h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  position: relative;
+  z-index: 1;
+}
+
+header p {
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.85);
+  position: relative;
+  z-index: 1;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+nav a:hover,
+nav a:focus {
+  border-color: var(--brand-gold);
+  color: var(--brand-gold);
+}
+
+main {
+  max-width: 960px;
+  margin: -3rem auto 3rem;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+section {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 2rem 2.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: var(--shadow);
+}
+
+section h2 {
+  margin-top: 0;
+  color: var(--brand-blue);
+  font-size: 1.6rem;
+}
+
+section p {
+  color: var(--text-muted);
+}
+
+.hero {
+  text-align: center;
+  padding: 2.5rem 2rem;
+}
+
+.hero p {
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+}
+
+.cta-button {
+  display: inline-block;
+  background: var(--brand-gold);
+  color: #1b1b1b;
+  font-weight: 600;
+  padding: 0.85rem 2.25rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 24px rgba(244, 180, 26, 0.35);
+}
+
+.cta-button:hover,
+.cta-button:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(244, 180, 26, 0.45);
+}
+
+.highlight-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  margin: 1.75rem 0 0;
+  list-style: none;
+}
+
+.highlight-list li {
+  background: #f0f4f9;
+  border-radius: 16px;
+  padding: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  box-shadow: inset 0 0 0 1px rgba(28, 61, 90, 0.08);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.services-grid li {
+  background: #fff6e1;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  color: #4b3810;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(244, 180, 26, 0.25);
+}
+
+.pill-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.pill-list li {
+  background: #eef3f7;
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--brand-blue);
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.two-column h3 {
+  margin-top: 0;
+  color: var(--brand-blue);
+}
+
+blockquote {
+  margin: 0;
+  padding: 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+blockquote strong {
+  display: block;
+  margin-top: 1rem;
+  color: var(--text-dark);
+  font-style: normal;
+}
+
+footer {
+  background: #0f2538;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+footer a {
+  color: var(--brand-gold);
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  header {
+    padding: 2rem 1.25rem 1.75rem;
+  }
+
+  section {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .cta-button {
+    width: 100%;
+  }
+}
