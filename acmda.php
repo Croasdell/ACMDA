@@ -10,6 +10,15 @@ function initDb(string $dbFile): PDO {
     $db = new PDO('sqlite:' . $dbFile);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->exec(<<<SQL
+        CREATE TABLE IF NOT EXISTS memory (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT,
+            message TEXT,
+            response TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+    SQL);
+    $db->exec(<<<SQL
         CREATE TABLE IF NOT EXISTS wa_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sender TEXT,
@@ -24,7 +33,15 @@ function initDb(string $dbFile): PDO {
     return $db;
 }
 
+function saveMemory(PDO $db, string $user, string $message, string $response): void {
+    $stmt = $db->prepare('INSERT INTO memory(user, message, response) VALUES (?, ?, ?)');
+    $stmt->execute([$user, $message, $response]);
+}
 
+function getMemory(PDO $db, string $user): array {
+    $stmt = $db->prepare('SELECT message, response FROM memory WHERE user = ? ORDER BY id');
+    $stmt->execute([$user]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 function defaultServices(): array {
     return [
         'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
@@ -33,12 +50,20 @@ function defaultServices(): array {
     ];
 }
 
+$services = [
+    'offers' => ['assembly', 'doors', 'locks', 'tiling', 'plumbing repairs'],
+    'not_offered' => ['carpet fitting', 'electrical rewiring'],
+    'policy' => 'Please use the online booking system for prices and availability.'
+];
+
+function draftReply(PDO $db, string $user, string $message, array $services): string {
 function draftReply(PDO $db, string $user, string $message): string {
     $services = loadBusinessData($db);
     $lower = strtolower($message);
     foreach ($services['offers'] as $service) {
         if (str_contains($lower, $service)) {
             $reply = "Yes, Ian can help with $service. {$services['policy']}";
+            saveMemory($db, $user, $message, $reply);
             mem_save($db, $user, 'user', $message);
             mem_save($db, $user, 'assistant', $reply);
             return $reply;
@@ -47,17 +72,21 @@ function draftReply(PDO $db, string $user, string $message): string {
     foreach ($services['not_offered'] as $service) {
         if (str_contains($lower, $service)) {
             $reply = "Ian doesn't provide $service. {$services['policy']}";
+            saveMemory($db, $user, $message, $reply);
             mem_save($db, $user, 'user', $message);
             mem_save($db, $user, 'assistant', $reply);
             return $reply;
         }
     }
     $reply = "Thanks for reaching out! {$services['policy']}";
+    saveMemory($db, $user, $message, $reply);
     mem_save($db, $user, 'user', $message);
     mem_save($db, $user, 'assistant', $reply);
     return $reply;
 }
 
+function receiveMessage(PDO $db, string $sender, string $message, array $services): int {
+    $draft = draftReply($db, $sender, $message, $services);
 function receiveMessage(PDO $db, string $sender, string $message): int {
     $draft = draftReply($db, $sender, $message);
     $stmt = $db->prepare('INSERT INTO wa_messages(sender, message, draft, status) VALUES (?, ?, ?, "pending")');
@@ -111,6 +140,7 @@ if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIP
         case 'receive':
             $sender = $argv[2] ?? 'customer';
             $msg = $argv[3] ?? '';
+            $id = receiveMessage($db, $sender, $msg, $services);
             $id = receiveMessage($db, $sender, $msg);
             echo "Message stored with id $id\n";
             break;
@@ -134,12 +164,15 @@ if (php_sapi_name() === 'cli' && basename(__FILE__) === basename($_SERVER['SCRIP
             break;
         case 'memory':
             $user = $argv[2] ?? 'customer';
+            $mem = getMemory($db, $user);
             $mem = mem_history($db, $user);
             foreach ($mem as $row) {
+                echo "{$row['message']} => {$row['response']}\n";
                 echo "{$row['role']}: {$row['content']}\n";
             }
             break;
         default:
+            echo "Usage: php acmda.php [receive|approve|reject|send|memory]\n";
             echo "Usage: php acmda.php [receive|approve|reject|regenerate|send|memory]\n";
     }
 }
