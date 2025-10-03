@@ -1,0 +1,22 @@
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect("acmda.db")
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS bookings
+                 (id INTEGER PRIMARY KEY, name TEXT, service TEXT, date TEXT, contact TEXT)''')
+    conn.commit()
+    conn.close()
+
+def add_booking(name, service, date, contact):
+    conn = sqlite3.connect("acmda.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO bookings (name, service, date, contact) VALUES (?, ?, ?, ?)",
+              (name, service, date, contact))
+    conn.commit()
+    conn.close()
+    print("Booking added.")
+
+if __name__ == "__main__":
+    init_db()
+    add_booking("John Doe", "Flat roof repair", "2025-10-10", "john@example.com")

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+<p><a href="/admin/logout">Logout</a></p>
+<h2>Bookings</h2>
+<form method="get" style="margin-bottom:1em;">
+    <input type="text" name="search" placeholder="Search name/contact" value="{{ search }}">
+    <select name="service">
+        <option value="">All Services</option>
+        {% for s in services %}
+            <option value="{{ s }}" {% if filter_service==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+</form>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Contact</th>
+        <th>Action</th>
+    </tr>
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking[0] }}</td>
+        <td>{{ booking[1] }}</td>
+        <td>{{ booking[2] }}</td>
+        <td>{{ booking[3] }}</td>
+        <td>{{ booking[4] }}</td>
+        <td>
+            <a href="/admin/edit/{{ booking[0] }}">Edit</a>
+            <form method="post" action="/admin/delete/{{ booking[0] }}" style="display:inline;">
+                {{ csrf_token() }}
+                <button type="submit" onclick="return confirm('Delete this booking?');">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

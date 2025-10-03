@@ -1,0 +1,5 @@
+import getpass
+
+def authenticate():
+    password = getpass.getpass("Enter admin password: ")
+    return password == "your_secure_password"
