@@ -1,0 +1,6 @@
+<FilesMatch "\.(sqlite|db)$">
+    Require all denied
+</FilesMatch>
+<Files "chat_config.php">
+    Require all denied
+</Files>

@@ -1,9 +1,0 @@
-def show_help():
-    print("""
-Available commands:
-- list_services: List all services
-- search_services <term>: Search for a service
-- book_service: Book a service
-- admin_dashboard: Launch web dashboard
-- help: Show this help message
-""")

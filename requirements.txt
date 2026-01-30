@@ -1,3 +1,0 @@
-requests
-pywhat3k
-python-telegram-bot

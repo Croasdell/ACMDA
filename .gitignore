@@ -1,13 +1,12 @@
-<<<<<<< HEAD
+# ACMDA Gitignore
 /vendor/
 acmda.sqlite
 .phpunit.result.cache
-=======
-# ACMDA Gitignore
 memory.sqlite
 *.tgz
 *.log
 .env
 node_modules/
 __pycache__/
->>>>>>> 0dda99d (Initial ACMDA project setup with services.txt, README, and .gitignore)
+.venv/
+archive/
