@@ -180,15 +180,18 @@
       <div class="card">
         <h3>Need help right now?</h3>
         <p>Use our chat assistant to ask a quick question at any time.</p>
-        <div class="chat-widget" id="chat-widget" data-booking="https://calendly.com/iancroasdell/handyman-plus-van" data-zoom="https://calendly.com/iancroasdell/20-minute-video-call-service-19" data-booking-full="https://calendly.com/iancroasdell/handyman-plus-van-6hrs" data-whatsapp="https://wa.me/447729689420">
-          <div class="chat-log" id="chat-log" aria-live="polite">
-            <div class="chat-message assistant">Hi! I can help you book a visit or a 20-minute Zoom call. What do you need help with?</div>
-          </div>
-          <div class="chat-controls">
-            <label for="chat-input">Your message</label>
-            <textarea id="chat-input" placeholder="Type your question here..."></textarea>
-            <button class="btn btn-primary" id="chat-send" type="button">Send message</button>
-            <p class="chat-status" id="chat-status">No quotes for big jobs. Booking help only.</p>
+        <div class="chat-widget collapsed" id="chat-widget" data-booking="https://calendly.com/iancroasdell/handyman-plus-van" data-zoom="https://calendly.com/iancroasdell/20-minute-video-call-service-19" data-booking-full="https://calendly.com/iancroasdell/handyman-plus-van-6hrs" data-whatsapp="https://wa.me/447729689420">
+          <button class="chat-toggle" id="chat-toggle" type="button" aria-expanded="false">Chat</button>
+          <div class="chat-panel">
+            <div class="chat-log" id="chat-log" aria-live="polite">
+              <div class="chat-message assistant">Hi! I can help you book a visit or a 20-minute Zoom call. What do you need help with?</div>
+            </div>
+            <div class="chat-controls">
+              <label for="chat-input">Your message</label>
+              <textarea id="chat-input" placeholder="Type your question here..."></textarea>
+              <button class="btn btn-primary" id="chat-send" type="button">Send message</button>
+              <p class="chat-status" id="chat-status">No quotes for big jobs. Booking help only.</p>
+            </div>
           </div>
         </div>
       </div>

@@ -12,13 +12,13 @@ class Thpace {
     this.coordinateTable = {};
     this.baseCoordinateTable = {};
     this.settings = extend({
-      triangleSize: 130,
+      triangleSize: 180,
       bleed: 200,
-      noise: 60,
-      color1: '#0b0b0b',
-      color2: '#1e1e1e',
-      pointVariationX: 20,
-      pointVariationY: 35,
+      noise: 70,
+      color1: '#090909',
+      color2: '#14161c',
+      pointVariationX: 14,
+      pointVariationY: 22,
       pointAnimationSpeed: 15,
       image: false,
       imageOpacity: 0.4
@@ -34,6 +34,9 @@ class Thpace {
     const ctx = this.ctx;
 
     ctx.clearRect(0, 0, this.width, this.height);
+
+    ctx.globalAlpha = 0.45;
+    ctx.lineWidth = 0.6;
 
     this.triangles.forEach((t) => {
       ctx.beginPath();
@@ -65,6 +68,8 @@ class Thpace {
       ctx.fill();
       ctx.stroke();
     });
+
+    ctx.globalAlpha = 1;
 
     this.particles.forEach((p) => {
       p.update();
@@ -161,7 +166,7 @@ class Thpace {
 
   generateParticles() {
     const particles = [];
-    for (let i = 0; i < 250; i++) {
+    for (let i = 0; i < 420; i++) {
       const pSet = {
         ctx: this.ctx,
         width: this.width,
@@ -209,9 +214,9 @@ class Particle {
     this.oy = this.y;
 
     this.interval = getRandomInt(1000, 5000);
-    this.limit = getRandomInt(5, 15);
-    this.opacity = getRandomFloat(0.1, 0.7);
-    this.r = getRandomFloat(1, 2);
+    this.limit = getRandomInt(2, 8);
+    this.opacity = getRandomFloat(0.2, 0.85);
+    this.r = getRandomFloat(0.6, 1.8);
   }
 
   update() {

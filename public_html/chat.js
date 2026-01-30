@@ -3,8 +3,16 @@ const log = document.getElementById("chat-log");
 const input = document.getElementById("chat-input");
 const sendBtn = document.getElementById("chat-send");
 const status = document.getElementById("chat-status");
+const toggleBtn = document.getElementById("chat-toggle");
 
 if (widget && log && input && sendBtn && status) {
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isCollapsed = widget.classList.toggle("collapsed");
+      toggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
+    });
+  }
+
   const links = {
     booking: widget.dataset.booking || "",
     bookingFull: widget.dataset.bookingFull || "",
