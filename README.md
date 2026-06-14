@@ -9,7 +9,6 @@
 
 No SaaS LLMs required; runs on your PC with Ollama-style local models (e.g., `mistral`, `dolphin-mistral`).
 
----
 
 ## What ACMDA does
 
@@ -29,7 +28,6 @@ No SaaS LLMs required; runs on your PC with Ollama-style local models (e.g., `mi
 
 **Safety stance:** WA bot is **offline + booking-only disabled** by default. It shares info, asks clarifying questions, and links to booking—not taking payments or final bookings in chat.
 
----
 
 ## Architecture (at a glance)
 
@@ -40,7 +38,6 @@ No SaaS LLMs required; runs on your PC with Ollama-style local models (e.g., `mi
 * **Web fetch (optional):** Small shell helper to fetch and strip a page into plain text.
 * **WhatsApp:** Webhook receiver → store inbound → generate draft → admin approve → sender posts to Cloud API.
 
----
 
 ## File/Folder structure (target)
 
@@ -103,7 +100,6 @@ ACMDA/
 > * Optional `web_fetch.sh`/`web.php` if you want “web:” context.
 > * Tests, health check, and cron/systemd wiring.
 
----
 
 ## Data model
 
@@ -136,7 +132,6 @@ wa_messages(
 )
 ```
 
----
 
 ## Key flows
 
@@ -154,7 +149,6 @@ wa_messages(
 3. Admin page lists pending → you edit/approve.
 4. `wa_send.php` pushes approved to Cloud API, marks `sent`.
 
----
 
 ## Environment variables / constants
 
@@ -175,7 +169,6 @@ wa_messages(
 
 * `APP_ADMIN_USER`, `APP_ADMIN_PASS` (HTTP basic for `/public` admin pages)
 
----
 
 ## Quick start (local CLI)
 
@@ -192,7 +185,6 @@ php dolphin_cli.php
 3. Send a message to your WA business number.
 4. Open admin page → review draft → approve → cron runs `wa_send.php`.
 
----
 
 ## Security & safety
 
@@ -201,7 +193,6 @@ php dolphin_cli.php
 * Basic auth on admin pages; tokens kept in `.env.local` (gitignored).
 * Web fetcher is optional and constrained (https, small size).
 
----
 
 ## Roadmap (build order)
 
@@ -211,12 +202,63 @@ php dolphin_cli.php
 4. **Health & tests**: `public/health.php`, basic PHPUnit tests.
 5. **Ops**: cron for sender, systemd/nginx, logs & rotation.
 
----
 
 # Data (enter later?)
 
 No actual `data/` or `app/` directories yet. Current repo is a barebones POC.
 
+ # ACMDA — AI Customer Messaging & Developer Assistant
+
+ ACMDA is a lightweight, self-hosted assistant for Handyman Plus Van. It provides:
+
+ - A local Dev Assistant (CLI) that can remember context and consult local docs (optional RAG).
+ - A WhatsApp message pipeline that generates draft replies for human review.
+
+ This repo is a Proof‑of‑Concept; the code lives in `public_html/` and several text files (e.g., `services.txt`).
+
+ Quick goals
+ - Answer customer queries with safe, on‑brand drafts (review before send).
+ - Provide a local developer assistant for code/docs help.
+
+ Quick start
+
+ 1. Serve the `public_html/` folder (example):
+
+ ```bash
+ cd public_html
+ php -S 127.0.0.1:8000
+ ```
+
+ 2. Edit `services.txt` to reflect your current offerings and business rules.
+
+ 3. Use `chat_endpoint.php` / `chat.js` for a local chat demo; use `wa_webhook.php` to accept WhatsApp webhooks.
+
+ What I found
+ - `public_html/` contains web endpoints (`wa_webhook.php`, `wa_send.php`, `wa_approve.php`), a `mem.php`, and a frontend — good starting point.
+ - `services.txt` contains a merge conflict (both versions present). This should be resolved so the assistant indexes a single canonical policy.
+ - There is no `app/` directory as described in older README text; paths in the README should be aligned with the repository layout.
+
+ Suggested next steps (prioritised)
+
+ 1. Resolve `services.txt` merge conflict and finalise the business facts (required for safe replies).
+ 2. Add a `.env.example` with required env names (`WA_TOKEN`, `WA_PHONE_ID`, `WA_VERIFY_TOKEN`, `LLM_ENDPOINT`, `LLM_MODEL`, `APP_ADMIN_USER`, `APP_ADMIN_PASS`).
+ 3. Create a small `install_deps.sh` that documents required packages (`php`, `php-sqlite3`, `curl`, `lynx`/`html2text`).
+ 4. Add `README` sections: deployment, env vars, running the PHP dev server, and basic troubleshooting.
+ 5. Add a short test harness or script to exercise the WhatsApp flow locally (dry run) and a `health.php` endpoint.
+
+ Security notes
+ - Keep tokens in `.env.local` (gitignored). Do not commit secrets.
+ - Admin pages should be protected by HTTP basic auth or other access control.
+ - The assistant must not perform bookings or financial actions — enforce in system prompts.
+
+ Contribution
+ If you'd like, I can:
+ - Resolve the `services.txt` conflict using the more complete version and commit it.
+ - Update `README.md` (done) and push the change.
+ - Create a `.env.example`, `install_deps.sh`, and a small health check endpoint, then push them.
+
+ Next action
+ I'll commit this README update and push it to `origin` unless you want changes first.
 =======
 # ACMDA – AI Customer Messaging & Developer Assistant
 
