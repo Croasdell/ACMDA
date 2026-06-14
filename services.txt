@@ -1,25 +1,4 @@
 <<<<<<< HEAD
-Handyman Plus Van Services
-=========================
-
-Provided:
-- Furniture assembly
-- Door and lock fitting
-- Shelving and small carpentry
-- Tiling repairs
-- Minor plumbing repairs (leaks, tap replacement)
-- Painting and decorating
-
-Not Offered:
-- Gas work or boiler servicing
-- Major electrical installations or rewiring
-- Carpet fitting
-- Large structural renovations
-
-Pricing & Booking:
-Quotes and availability are handled via the booking system on https://www.handymanplusvan.co.uk.
-Please do not book directly through messages.
-=======
 Handyman Plus Van – Services Knowledge Base
 
 ---
@@ -65,4 +44,3 @@ Handyman Plus Van – Services Knowledge Base
 ---
 
 This file is indexed for Dolphin AI. Replies should always reflect the above policies and service list. If a service is not listed, assume it is NOT offered unless confirmed by Ian.
->>>>>>> 0dda99d (Initial ACMDA project setup with services.txt, README, and .gitignore)

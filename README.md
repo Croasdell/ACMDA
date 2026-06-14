@@ -32,252 +32,63 @@ No SaaS LLMs required; runs on your PC with Ollama-style local models (e.g., `mi
 ## Architecture (at a glance)
 
 * **Models (local):** `mistral`, `dolphin-mistral(-dev)`, others via Ollama-style `/api/generate`.
-* **Core:** `llm.php` wraps the model call; composes the system prompt + memory + optional context.
-* **Memory:** SQLite (disk) via `mem.php`. Namespaced by “who” (e.g., `dolphin-cli`, `wa-bot:+447…`) so CLI and WA are isolated.
-* **RAG (optional):** Index `dev_docs/` into text chunks; simple retrieval returns top chunks as context.
-* **Web fetch (optional):** Small shell helper to fetch and strip a page into plain text.
-* **WhatsApp:** Webhook receiver → store inbound → generate draft → admin approve → sender posts to Cloud API.
+# ACMDA — AI Customer Messaging & Developer Assistant
 
+ACMDA is a lightweight, self-hosted assistant for Handyman Plus Van. It provides:
 
-## File/Folder structure (target)
+- A local Dev Assistant (CLI) that can remember context and consult local docs (optional RAG).
+- A WhatsApp message pipeline that generates draft replies for human review (review-before-send).
 
-```
-ACMDA/
-├─ app/
-│  ├─ config.dolphin.php         # LLM endpoint/model, business name, rules (CLI)
-│  ├─ config.whatsapp.php        # WA tokens, phone id, verify token, business rules
-│  ├─ llm.php                    # llm_answer($userMsg, $context='', $who='...')
-│  ├─ mem.php                    # SQLite memory: save/history/clear/context
-│  ├─ services.php               # Structured “what we do / don’t” facts for drafts
-│  ├─ rag.php                    # (optional) simple doc retrieval for local PDFs/TXTs
-│  ├─ web.php                    # (optional) wrapper around web_fetch.sh
-│  ├─ wa_db.php                  # SQLite for WhatsApp message states
-│  ├─ wa_send.php                # Sends approved drafts to WhatsApp Cloud API
-│  ├─ wa_approve.php             # Minimal admin UI to review/edit/approve drafts
-│  └─ util.php                   # log_info(), log_err(), helpers
-│
-├─ public/
-│  ├─ index.php                  # Dashboard (filter pending/approved/sent)
-│  ├─ wa_webhook.php             # Meta webhook (GET verify + POST inbound)
-│  └─ health.php                 # Health check: DB + model ping + versions
-│
-├─ scripts/
-│  ├─ dev_index_folder.sh        # Build plain-text chunks from dev_docs/
-│  ├─ web_fetch.sh               # Fetch and strip a URL to text (optional)
-│  ├─ wa_send_cron.sh            # Cron entry point for wa_send
-│  ├─ install_deps.sh            # php-sqlite3, curl, lynx/html2text, etc.
-│  └─ dev_up.sh                  # start local server, tail logs
-│
-├─ dev_docs/                     # Your PDFs/TXTs (PHP refs, service notes, etc.)
-├─ data/
-│  ├─ memory.sqlite              # Chat memory (persisted)
-│  └─ wa.sqlite                  # WhatsApp message queue/state
-│
-├─ tests/
-│  ├─ MemTest.php
-│  ├─ LlmPromptTest.php
-│  └─ WaFlowTest.php
-│
-├─ dolphin_cli.php               # Tiny CLI loop that calls llm_answer()
-├─ .env.local                    # (gitignored) local secrets/overrides
-├─ .gitignore                    # ignore sqlite, logs, .env.local
-└─ README.md                     # you are here
-```
+Repo layout notes
 
-> **Already done (based on our work so far):**
->
-> * `app/mem.php` (SQLite memory) ✅
-> * `app/llm.php` (time injection + prompt + saves both sides) ✅
-> * `dolphin_cli.php` (CLI) ✅
-> * Basic WhatsApp config & webhook scaffolding ✅
-> * Verified tokens and model list on your machine ✅
->
-> **Still to finish (the build plan):**
->
-> * `services.php` with your **business facts** (clear, concise, no-booking).
-> * `wa_db.php` + `wa_send.php` + `wa_approve.php` + minimal `public/index.php`.
-> * Optional **RAG** pipeline for `dev_docs/` + simple retrieval.
-> * Optional `web_fetch.sh`/`web.php` if you want “web:” context.
-> * Tests, health check, and cron/systemd wiring.
+- The active web code lives in `public_html/` (web endpoints, frontend, and `mem.php`).
+- The long-term `app/` layout described in earlier notes is a target structure; some components live in `public_html/` today.
 
+Quick goals
 
-## Data model
+- Answer customer queries with safe, on-brand drafts (human review required).
+- Provide a local developer assistant for code and documentation help.
 
-### Memory (SQLite: `data/memory.sqlite`)
+Quick start (local)
 
-```
-chat_memory(
-  id INTEGER PK,
-  who TEXT,              -- namespace (e.g., 'dolphin-cli', 'wa-bot:+447…')
-  role TEXT,             -- 'user' | 'assistant'
-  content TEXT,
-  created_at INTEGER
-)
-INDEX: idx_chat_memory_who (who)
-```
-
-### WhatsApp (SQLite: `data/wa.sqlite`)
-
-```
-wa_messages(
-  id INTEGER PK,
-  from_msisdn TEXT,
-  body TEXT,               -- inbound text
-  draft TEXT,              -- AI-generated reply
-  state TEXT,              -- 'pending' | 'approved' | 'sent'
-  not_before INTEGER,      -- optional delay/24h rule
-  created_at INTEGER,
-  sent_at INTEGER,
-  wa_msg_id TEXT           -- Cloud API message id
-)
-```
-
-
-## Key flows
-
-### A) CLI (Dev Assistant)
-
-1. User types in terminal → `dolphin_cli.php`
-2. `llm.php` builds prompt: system rules + UK time + last N lines from `mem.php` + optional context.
-3. Call local model (`/api/generate`).
-4. Save both sides to `chat_memory` (namespace `dolphin-cli`).
-
-### B) WhatsApp (review before send)
-
-1. Webhook receives inbound message, stores `wa_messages(state='pending')`.
-2. Generate **draft** with `llm_answer($userMsg, services_context(), 'wa-bot:+447…')`.
-3. Admin page lists pending → you edit/approve.
-4. `wa_send.php` pushes approved to Cloud API, marks `sent`.
-
-
-## Environment variables / constants
-
-**LLM / CLI**
-
-* `LLM_ENDPOINT` (e.g., `http://127.0.0.1:11434/api/generate`)
-* `LLM_MODEL` (e.g., `mistral`)
-* `BUSINESS_NAME`
-* `SYSTEM_RULES` (multi-line: no booking, use services facts, ask brief clarifiers, etc.)
-
-**WhatsApp**
-
-* `WA_TOKEN`
-* `WA_PHONE_ID` (numeric)
-* `WA_VERIFY_TOKEN` (for webhook GET validation)
-
-**Admin**
-
-* `APP_ADMIN_USER`, `APP_ADMIN_PASS` (HTTP basic for `/public` admin pages)
-
-
-## Quick start (local CLI)
+1. Serve the `public_html/` folder locally:
 
 ```bash
-# models already installed via Ollama
-php dolphin_cli.php
-# talk; memory persists in data/memory.sqlite
+cd public_html
+php -S 127.0.0.1:8000
 ```
 
-## Quick start (WhatsApp)
+2. Edit `services.txt` to reflect your current offerings and business rules (this file is now canonical).
 
-1. Expose `public/wa_webhook.php` (HTTPS).
-2. Set webhook in Meta app; verify with `WA_VERIFY_TOKEN`.
-3. Send a message to your WA business number.
-4. Open admin page → review draft → approve → cron runs `wa_send.php`.
+3. Use `chat_endpoint.php` / `chat.js` for a local chat demo; use `wa_webhook.php` to accept WhatsApp webhooks.
 
+What I found
 
-## Security & safety
+- `public_html/` contains web endpoints (`wa_webhook.php`, `wa_send.php`, `wa_approve.php`), a `mem.php`, and a frontend — good starting point.
+- `services.txt` has been canonicalized; the file `services.txt` is now the single source of truth for service facts.
+- There is no complete `app/` directory yet; consider migrating core logic into `app/` for clearer separation.
 
-* WA bot is **info-only** (no bookings/payments).
-* Services facts are centralized in `services.php`; the prompt forbids making up prices or live browsing.
-* Basic auth on admin pages; tokens kept in `.env.local` (gitignored).
-* Web fetcher is optional and constrained (https, small size).
+Suggested next steps (prioritised)
 
+1. Add a `.env.example` listing required env vars (`WA_TOKEN`, `WA_PHONE_ID`, `WA_VERIFY_TOKEN`, `LLM_ENDPOINT`, `LLM_MODEL`, `APP_ADMIN_USER`, `APP_ADMIN_PASS`).
+2. Create an `install_deps.sh` documenting required packages (`php`, `php-sqlite3`, `curl`, `lynx`/`html2text`).
+3. Add a small `public_html/health.php` endpoint that checks DB and model connectivity.
+4. Add a simple test script to exercise the WhatsApp flow locally (dry run mode).
+5. Optionally implement `app/` structure and move core logic from `public_html/` into `app/`.
 
-## Roadmap (build order)
+Security notes
 
-1. **Finish WA queue**: `wa_db.php`, `wa_send.php`, `wa_approve.php`, `public/index.php`.
-2. **services.php**: encode what you do/don’t do, areas, hours, warranty, exclusions.
-3. **RAG** (optional): index `dev_docs/`, wire `rag.php` into CLI `dolphin` as `RAG:` mode.
-4. **Health & tests**: `public/health.php`, basic PHPUnit tests.
-5. **Ops**: cron for sender, systemd/nginx, logs & rotation.
+- Keep tokens in `.env.local` (gitignored). Do not commit secrets.
+- Protect admin pages with HTTP basic auth or stronger access control.
+- Enforce “no bookings/payments” in system prompts and code paths.
 
+Contribution
 
-# Data (enter later?)
+If you want I can next:
 
-No actual `data/` or `app/` directories yet. Current repo is a barebones POC.
+- Create `.env.example` and `install_deps.sh` and push them.
+- Add `public_html/health.php` and a simple test harness for the WA flow.
 
- # ACMDA — AI Customer Messaging & Developer Assistant
+Status
 
- ACMDA is a lightweight, self-hosted assistant for Handyman Plus Van. It provides:
-
- - A local Dev Assistant (CLI) that can remember context and consult local docs (optional RAG).
- - A WhatsApp message pipeline that generates draft replies for human review.
-
- This repo is a Proof‑of‑Concept; the code lives in `public_html/` and several text files (e.g., `services.txt`).
-
- Quick goals
- - Answer customer queries with safe, on‑brand drafts (review before send).
- - Provide a local developer assistant for code/docs help.
-
- Quick start
-
- 1. Serve the `public_html/` folder (example):
-
- ```bash
- cd public_html
- php -S 127.0.0.1:8000
- ```
-
- 2. Edit `services.txt` to reflect your current offerings and business rules.
-
- 3. Use `chat_endpoint.php` / `chat.js` for a local chat demo; use `wa_webhook.php` to accept WhatsApp webhooks.
-
- What I found
- - `public_html/` contains web endpoints (`wa_webhook.php`, `wa_send.php`, `wa_approve.php`), a `mem.php`, and a frontend — good starting point.
- - `services.txt` contains a merge conflict (both versions present). This should be resolved so the assistant indexes a single canonical policy.
- - There is no `app/` directory as described in older README text; paths in the README should be aligned with the repository layout.
-
- Suggested next steps (prioritised)
-
- 1. Resolve `services.txt` merge conflict and finalise the business facts (required for safe replies).
- 2. Add a `.env.example` with required env names (`WA_TOKEN`, `WA_PHONE_ID`, `WA_VERIFY_TOKEN`, `LLM_ENDPOINT`, `LLM_MODEL`, `APP_ADMIN_USER`, `APP_ADMIN_PASS`).
- 3. Create a small `install_deps.sh` that documents required packages (`php`, `php-sqlite3`, `curl`, `lynx`/`html2text`).
- 4. Add `README` sections: deployment, env vars, running the PHP dev server, and basic troubleshooting.
- 5. Add a short test harness or script to exercise the WhatsApp flow locally (dry run) and a `health.php` endpoint.
-
- Security notes
- - Keep tokens in `.env.local` (gitignored). Do not commit secrets.
- - Admin pages should be protected by HTTP basic auth or other access control.
- - The assistant must not perform bookings or financial actions — enforce in system prompts.
-
- Contribution
- If you'd like, I can:
- - Resolve the `services.txt` conflict using the more complete version and commit it.
- - Update `README.md` (done) and push the change.
- - Create a `.env.example`, `install_deps.sh`, and a small health check endpoint, then push them.
-
- Next action
- I'll commit this README update and push it to `origin` unless you want changes first.
-=======
-# ACMDA – AI Customer Messaging & Developer Assistant
-
-This project is a local AI system for customer messaging and developer assistance, designed for Handyman Plus Van. It includes:
-- Secure, offline AI assistant (Dolphin)
-- WhatsApp integration with human approval
-- Business knowledge base
-- Developer helper mode
-
-## Setup
-1. Clone this repo to your local machine or server.
-2. Add business documents to `services.txt`.
-3. Run indexing scripts to train the AI.
-
-## Usage
-- For customer messaging, use the WhatsApp pipeline.
-- For developer help, use the RAG system and local docs.
-
----
-
-See `services.txt` for business services and policies.
->>>>>>> 0dda99d (Initial ACMDA project setup with services.txt, README, and .gitignore)
+I have resolved the `services.txt` conflict and updated this `README.md`. Changes are ready to be pushed.
