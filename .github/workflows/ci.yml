@@ -1,19 +1,31 @@
-name: Python CI
+name: PHP CI
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
         with:
-          python-version: '3.10'
-      - name: Install dependencies
+          php-version: '8.2'
+          extensions: pdo_sqlite
+
+      - name: Lint PHP files
+        run: find . -path './public_html/vendor' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Smoke test message workflow
         run: |
-          pip install -r requirements.txt
-      - name: Run tests
-        run: |
-          pytest
+          php -r '
+            require "public_html/acmda.php";
+            $db = initDb(":memory:");
+            saveBusinessData($db, defaultServices());
+            $id = receiveMessage($db, "ci", "Need tiling");
+            $row = $db->query("SELECT status, draft FROM wa_messages WHERE id = " . (int) $id)->fetch(PDO::FETCH_ASSOC);
+            if ($row["status"] !== "pending" || !str_contains($row["draft"], "tiling")) {
+                exit(1);
+            }
+          '
